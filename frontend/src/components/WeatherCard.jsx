@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 const WeatherCard = ({ 
   city, 
@@ -15,7 +16,14 @@ const WeatherCard = ({
   uv,
   lastUpdated 
 }) => {
+  const { unit } = useSelector((state) => state.settings);
   const normalizedIcon = icon?.startsWith("http") ? icon : icon ? `https:${icon}` : null;
+
+  const convertTemp = (tempC) => {
+    return unit === "fahrenheit" ? (tempC * 9/5) + 32 : tempC;
+  };
+
+  const unitSymbol = unit === "celsius" ? "C" : "F";
 
   return (
     <div className="weather-card-main">
@@ -32,11 +40,11 @@ const WeatherCard = ({
 
       <div className="weather-main-info">
         <div className="temp-display">
-          <span className="temp-value">{Math.round(temp)}</span>
-          <span className="temp-unit">°C</span>
+          <span className="temp-value">{Math.round(convertTemp(temp))}</span>
+          <span className="temp-unit">°{unitSymbol}</span>
         </div>
         <p className="weather-condition">{condition}</p>
-        <p className="feels-like">Feels like {Math.round(feelsLike)}°C</p>
+        <p className="feels-like">Feels like {Math.round(convertTemp(feelsLike))}°{unitSymbol}</p>
       </div>
 
       <div className="weather-details-grid">

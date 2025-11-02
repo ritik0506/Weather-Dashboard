@@ -1,12 +1,21 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from "recharts";
 
 const ChartComponent = ({ forecast }) => {
+  const { unit } = useSelector((state) => state.settings);
+
+  const convertTemp = (tempC) => {
+    return unit === "fahrenheit" ? (tempC * 9/5) + 32 : tempC;
+  };
+
+  const unitSymbol = unit === "celsius" ? "°C" : "°F";
+
   const chartData = forecast.map((day) => ({
     date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    "Max Temp": day.day.maxtemp_c,
-    "Min Temp": day.day.mintemp_c,
-    "Avg Temp": day.day.avgtemp_c,
+    "Max Temp": Math.round(convertTemp(day.day.maxtemp_c)),
+    "Min Temp": Math.round(convertTemp(day.day.mintemp_c)),
+    "Avg Temp": Math.round(convertTemp(day.day.avgtemp_c)),
   }));
 
   const CustomTooltip = ({ active, payload }) => {
@@ -16,7 +25,7 @@ const ChartComponent = ({ forecast }) => {
           <p className="tooltip-date">{payload[0].payload.date}</p>
           {payload.map((entry, index) => (
             <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {entry.value}°C
+              {entry.name}: {entry.value}{unitSymbol}
             </p>
           ))}
         </div>
@@ -38,7 +47,7 @@ const ChartComponent = ({ forecast }) => {
           <YAxis 
             stroke="#666"
             style={{ fontSize: '0.85rem' }}
-            label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft' }}
+            label={{ value: `Temperature (${unitSymbol})`, angle: -90, position: 'insideLeft' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ paddingTop: '10px' }} />
